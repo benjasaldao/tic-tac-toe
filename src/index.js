@@ -8,11 +8,15 @@ function TicTacToe(gameConfig) {
     this.O = gameConfig.O;
     this.initGame = this.initGame.bind(this);
     this.putMark = this.putMark.bind(this);
+    this.restartGame = this.restartGame.bind(this)
     this.gameMatrix = [
         ["", "", ""],
         ["", "", ""],
         ["", "", ""],
     ]
+    this.cages = gameConfig.cages;
+    this.menu = gameConfig.menu;
+    this.restartButton = gameConfig.restartButton
 }
 
 TicTacToe.prototype.initGame = function() {
@@ -32,7 +36,7 @@ TicTacToe.prototype.setFirstTurn = function() {
     } else {
         alert("Algo salio mal! mejor recarga la pagina!")
     }
-    this.showTurn()
+    this.showTurn();
 }
 
 TicTacToe.prototype.showTurn = function() {
@@ -63,46 +67,77 @@ TicTacToe.prototype.putMark = function(ev) {
     if (targetCage) {
         const mark = this[this.turn].cloneNode(true);
         const targetDiv = document.getElementById(targetCage)
-        targetDiv.appendChild(mark);
-        this.completeMatrix(targetCage);
-        if (this.didSomebodyWin()) {
-            this.finishGame(true)
-        } else if(this.isMatrixFull()) {
-            this.finishGame(false)
-        } else {
-            this.changeTurn()
+        const isCageEmpty = this.completeMatrix(targetCage);
+
+        if (isCageEmpty) {
+            targetDiv.appendChild(mark);
+            if (this.didSomebodyWin()) {
+                this.finishGame(true)
+            } else if(this.isMatrixFull()) {
+                this.finishGame(false)
+            } else {
+                this.changeTurn()
+            }
         }
     }
 }
 
 TicTacToe.prototype.completeMatrix = function(cageId) {
+    
     switch (cageId) {
         case "1":
-            this.gameMatrix[0][0] = this.turn;
+            if (this.gameMatrix[0][0] === "") {
+                this.gameMatrix[0][0] = this.turn;
+                return true
+            }
             break
         case "2":
-            this.gameMatrix[0][1] = this.turn;
+            if (this.gameMatrix[0][1] === "") {
+                this.gameMatrix[0][1] = this.turn;
+                return true
+            }
             break
         case "3":
-            this.gameMatrix[0][2] = this.turn;
+            if (this.gameMatrix[0][2] === "") {
+                this.gameMatrix[0][2] = this.turn;
+                return true
+            }
             break
         case "4":
-            this.gameMatrix[1][0] = this.turn;
+            if (this.gameMatrix[1][0] === "") {
+                this.gameMatrix[1][0] = this.turn;
+                return true
+            }
             break
         case "5":
-            this.gameMatrix[1][1] = this.turn;
+            if (this.gameMatrix[1][1] === "") {
+                this.gameMatrix[1][1] = this.turn;
+                return true
+            }
             break
         case "6":
-            this.gameMatrix[1][2] = this.turn;
+            if (this.gameMatrix[1][2] === "") {
+                this.gameMatrix[1][2] = this.turn;
+                return true
+            }
             break
         case "7":
-            this.gameMatrix[2][0] = this.turn;
+            if (this.gameMatrix[2][0] === "") {
+                this.gameMatrix[2][0] = this.turn;
+                return true
+            }
             break
         case "8":
-            this.gameMatrix[2][1] = this.turn;
+            if (this.gameMatrix[2][1] === "") {
+                this.gameMatrix[2][1] = this.turn;
+                return true
+            }
             break
         case "9":
-            this.gameMatrix[2][2] = this.turn;
+            if (this.gameMatrix[2][2] === "") {
+                this.gameMatrix[2][2] = this.turn;
+                return true
+            }
             break  
     }
 }
@@ -125,20 +160,16 @@ TicTacToe.prototype.isHorizontalLine = function() {
 }
 
 TicTacToe.prototype.isVerticalLine = function () {
-    let verticalLine = [];
     for (let i = 0; i < this.gameMatrix.length; i++) {
+        let verticalLine = [];
         for (let j = 0; j < this.gameMatrix.length; j++) {
-            if (j === 0) {
-                verticalLine = []
-            }
             verticalLine.push(this.gameMatrix[j][i]);
-            if(verticalLine.length === 3) {
-                if (verticalLine.every(currentValue => currentValue === this.turn)) {
-                    return true;
-                }
-            }
+        }
+        if (verticalLine.every(currentValue => currentValue === this.turn)) {
+            return true;
         }
     }
+    return false;
 }
 
 TicTacToe.prototype.isDiagonal = function() {
@@ -159,16 +190,54 @@ TicTacToe.prototype.isMatrixFull = function() {
             matrixInAList.push(this.gameMatrix[i][j]);
         }
     }
-    return !matrixInAList.includes("");
+
+    if (matrixInAList.includes("")) {
+        return false
+    } else {
+        return true
+    }
 }
 
 TicTacToe.prototype.finishGame = function(isWinner) {
     this.removeClickEvent()
+    this.showMenu()
+    const showWinnerP = document.getElementById("winner");
     if(isWinner) {
-        alert(this.turn + " gano la partida");
+        showWinnerP.innerHTML = "El ganador es: " + this.turn
     } else {
-        alert("Empate!")
+        showWinnerP.innerHTML = "Hubo un empate!"
     }
+}
+
+TicTacToe.prototype.restartGame = function() {
+    this.hideMenu()
+    this.cleanCages();
+    this.cleanMatrix();
+    this.initGame()
+}
+
+TicTacToe.prototype.cleanCages = function() {
+    for (let i = 0; i < this.cages.length; i++) {
+        while (this.cages[i].firstChild) {
+            this.cages[i].removeChild(this.cages[i].firstChild)
+        }
+    }
+}
+
+TicTacToe.prototype.cleanMatrix = function() {
+    for (let i = 0; i < this.gameMatrix.length; i++) {
+        for (let j = 0; j< this.gameMatrix[i].length; j++) {
+            this.gameMatrix[i][j] = "";
+        }
+    }
+}
+
+TicTacToe.prototype.showMenu = function() {
+    this.gameContainer.appendChild(this.menu);
+    this.restartButton.addEventListener("click", this.restartGame);
+}
+TicTacToe.prototype.hideMenu = function() {
+    this.gameContainer.removeChild(this.menu)
 }
 
 const initGameButton = document.getElementById("init-game");
@@ -179,8 +248,12 @@ const gameConfig = {
     buttonContainer: document.getElementById("button-container"),
     X: document.getElementById("X"),
     O: document.getElementById("O"),
+    cages: document.getElementsByClassName("cage"),
+    menu: document.getElementById("menu"),
+    restartButton: document.getElementById("restart-button")
 }
 
 const game = new TicTacToe(gameConfig);
 
 initGameButton.onclick = game.initGame;
+
